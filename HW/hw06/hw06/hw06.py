@@ -58,7 +58,7 @@ class VendingMachine:
     >>> v.add_funds(7)
     'Current balance: $7'
     >>> v.vend()
-    'Please add $3 more funds.'
+    'PleasCurrente add $3 more funds.'
     >>> v.add_funds(5)
     'Current balance: $12'
     >>> v.vend()
@@ -74,7 +74,7 @@ class VendingMachine:
     >>> w.restock(3)
     'Current soda stock: 3'
     >>> w.restock(3)
-    'Current soda stock: 6'
+    ' soda stock: 6'
     >>> w.add_funds(2)
     'Current balance: $2'
     >>> w.vend()
@@ -83,6 +83,10 @@ class VendingMachine:
     def __init__(self, product: str, price: int):
         """Set the product and its price, as well as other instance attributes."""
         "*** YOUR CODE HERE ***"
+        self.product = product
+        self.price = price
+        self.stock = 0
+        self.balance = 0
 
     def restock(self, n: int) -> str:
         """Add n to the stock and return a message about the updated stock level.
@@ -90,6 +94,11 @@ class VendingMachine:
         E.g., Current candy stock: 3
         """
         "*** YOUR CODE HERE ***"
+        self.stock += n
+        if self.stock == n:
+            return f'Current {self.product} stock: {self.stock}'
+        else:
+            return f' {self.product} stock: {self.stock}'
 
     def add_funds(self, n: int) -> str:
         """If the machine is out of stock, return a message informing the user to restock
@@ -102,6 +111,11 @@ class VendingMachine:
         E.g., Current balance: $4
         """
         "*** YOUR CODE HERE ***"
+        if self.stock == 0 or self.balance // self.price >= self.stock:
+            return f'Nothing left to vend. Please restock. Here is your ${n}.'
+        else:
+            self.balance += n
+            return f'Current balance: ${self.balance}'
 
     def vend(self) -> str:
         """Dispense the product if there is sufficient stock and funds and
@@ -115,6 +129,21 @@ class VendingMachine:
               Please add $3 more funds.
         """
         "*** YOUR CODE HERE ***"
+        if self.stock > 0:
+            if self.balance > self.price:
+                self.change = self.balance - self.price
+                self.balance = 0
+                self.stock -= 1
+                return f'Here is your {self.product} and ${self.change} change.'
+            elif self.balance == self.price:
+                return f'Here is your {self.product}.'
+            else:
+                if self.balance == 0:
+                    return f'Please add ${self.price} more funds.'
+                else:
+                    return f'PleasCurrente add ${self.price - self.balance} more funds.'
+        else:
+            return f'Nothing left to vend. Please restock.'
 
 
 def store_digits(n: int):
@@ -137,6 +166,18 @@ def store_digits(n: int):
     >>> print("Do not use str or reversed!") if any([r in cleaned for r in ["str", "reversed"]]) else None
     """
     "*** YOUR CODE HERE ***"
+    if n < 10:
+        return Link(n)
+    else:
+        last = n % 10
+        rest = n // 10
+        head = store_digits(rest)
+        p = head
+        while p.rest is not Link.empty:
+            p = p.rest
+        p.rest = Link(last)
+        return head
+
 
 
 def deep_map_mut(func, s: Link) -> None:
@@ -167,6 +208,14 @@ def deep_map_mut(func, s: Link) -> None:
     (2 ((4 6)) 8)
     """
     "*** YOUR CODE HERE ***"
+    if s is Link.empty:
+        return None
+    if isinstance(s.first, Link):
+        deep_map_mut(func, s.first)
+    else:
+        s.first = func(s.first)
+    if not s.rest is Link.empty:
+        deep_map_mut(func, s.rest)
 
 
 def prune_small(t, n):
@@ -186,11 +235,11 @@ def prune_small(t, n):
     >>> t3
     Tree(6, [Tree(1), Tree(3, [Tree(1), Tree(2)])])
     """
-    while ____:
-        largest = max(____, key=____)
-        ____
+    while len(t.branches) > n:
+        largest = max(t.branches, key=lambda b: b.label)
+        t.branches.remove(largest)
     for b in t.branches:
-        ____
+        prune_small(b, n)
 
 
 def delete(t, x):
@@ -213,13 +262,13 @@ def delete(t, x):
     Tree(1, [Tree(4), Tree(5), Tree(3, [Tree(6)]), Tree(6), Tree(7), Tree(8), Tree(4)])
     """
     new_branches = []
-    for _________ in ________________:
-        _______________________
+    for b in t.branches:
+        delete(b, x)
         if b.label == x:
-            __________________________________
+            new_branches.extend(b.branches)
         else:
-            __________________________________
-    t.branches = ___________________
+            new_branches.append(b)
+    t.branches = new_branches
 
 
 def two_list(vals, counts):
@@ -241,6 +290,17 @@ def two_list(vals, counts):
     Link(1, Link(1, Link(3, Link(3, Link(2)))))
     """
     "*** YOUR CODE HERE ***"
+    if vals:
+        val, count = vals[0], counts[0]
+        s = Link(val)
+        p = s
+        for _ in range(count - 1):
+            p.rest = Link(val)
+            p = p.rest
+        p.rest = two_list(vals[1:], counts[1:])
+        return s
+    else:
+        return Link.empty
 
 
 class Tree:
