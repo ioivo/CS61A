@@ -93,7 +93,7 @@ def total_mass(m):
         assert is_mobile(m), "must get total mass of a mobile or a planet"
         return total_mass(end(left(m))) + total_mass(end(right(m)))
 
-def balanced(m):
+def balanced(m): 
     """Return whether m is balanced.
 
     >>> t, u, v = examples()
